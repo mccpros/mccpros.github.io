@@ -29,35 +29,44 @@ var mesh = new THREE.Mesh(geometry, material);
 mesh.position.set(0, controls.userHeight, -1);
 scene.add(mesh);
 
+for(var i = 0; i < hotspots.length; i++) {
 
-var sphereGeometry = new THREE.SphereGeometry( .95, 32, 32 );
-var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
-var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-sphere.name = 'lancontroller';
-sphere.position.set(20, 9, -6);
-scene.add(sphere);
+  var hotspot      = hotspots[0],
+      sphereData   = hotspot.sphere,
+      cardData     = hotspot.card,
+      outlineData  = hotspot.outline,
+      cardTextData = hotspot.cardText;
 
-var cardText = new THREEx.DynamicTexture(800, 800);
-cardText.context.font = "100px Roboto";
-cardText.texture.anisotropy = renderer.getMaxAnisotropy();
-cardText.drawText("LAN Controller", undefined, 85, 'white');
+  var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
+  var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
+  var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+  sphere.name = hotspot.name;
+  sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
+  scene.add(sphere);
 
-var cardGeo = new THREE.PlaneBufferGeometry( 8, 10, 10 );
-var cardMat = new THREE.MeshBasicMaterial({ color: 0xf1f1f1, side: THREE.DoubleSide, map: cardText.texture });
-var card = new THREE.Mesh( cardGeo, cardMat );
+  var cardText = new THREEx.DynamicTexture( cardTextData.size.x, cardTextData.size.y );
+  cardText.context.font = cardTextData.fontSize + "px Roboto";
+  cardText.texture.anisotropy = renderer.getMaxAnisotropy();
+  cardText.clear('gray').drawText(cardTextData.header, undefined, cardTextData.x, 'white');
 
-card.name = 'lancontroller';
-card.position.set(20, 9, -6);
-card.scale.set( 0, 0 );
-scene.add(card);
+  var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
+  var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: cardText.texture, color: 0xf1f1f1 });
+  var card = new THREE.Mesh( cardGeo, cardMat );
 
-var crosshairGeometry = new THREE.SphereGeometry( .3, 32, 32 );
-var crosshairMaterial = new THREE.MeshBasicMaterial({color: 0x4b4b4b, side: THREE.DoubleSide});
-var crosshair = new THREE.Mesh( crosshairGeometry, crosshairMaterial );
-crosshair.name = 'crosshair';
-crosshair.position.set(0, 0, -50);
+  var outlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.FrontSide });
+  var outlineMesh = new THREE.Mesh( cardGeo, outlineMat );
+  outlineMesh.scale.multiplyScalar(outlineData.multipier);
 
-Reticulum.add( sphere, {
+  card.name = 'card';
+  card.position.set( cardData.pos.x, cardData.pos.y, cardData.pos.z );
+  outlineMesh.position.set( outlineData.pos.x, outlineData.pos.y, outlineData.pos.z );
+
+  card.scale.set( 0, 0, 1 );
+  outlineMesh.scale.set( 0, 0, 1 );
+  scene.add( card );
+  scene.add( outlineMesh );
+
+  Reticulum.add( sphere, card, {
     clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
     reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
     fuseVisible: true, // Overrides global fuse visibility
@@ -67,6 +76,7 @@ Reticulum.add( sphere, {
     card: card,
     opened: false,
     cardPosition: { x: 28, y: 9, z: -15 },
+    timeout: null,
     onGazeOver: function() {
       // do something when user targets object
       this.scale.set(1.1, 1.1, 1.1, 1.1);
@@ -74,11 +84,14 @@ Reticulum.add( sphere, {
     onGazeOut: function(){
       // do something when user moves reticle off targeted object
       this.scale.set(1, 1, 1);
-      if(this.opened) {
-        var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-        shrinkCard(this.card, shallowPosition, this.card.position, 200);
-        this.opened = false;
-      }
+
+      this.timeout = setTimeout(function() {
+        if(this.opened) {
+          var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
+          shrinkCard(this.card, shallowPosition, this.card.position, 200);
+          this.opened = false;
+        }
+      }.bind(this), 2000)
     },
     onGazeLong: function() {
       if(!this.opened) {
@@ -87,10 +100,27 @@ Reticulum.add( sphere, {
         this.opened = true;
       }
     },
-    onGazeClick: function(){
-      // have the object react when user clicks / taps on targeted object
+    onGazeCard: function(){
+      console.log("CARD IN");
+      clearTimeout(this.parentSphere.timeout);
+    },
+    outGazeCard: function(){
+      console.log("CARD OUT");
+      console.log(this.parentSphere);
+      if(this.parentSphere.opened) {
+        clearTimeout(this.parentSphere.timeout);
+        this.parentSphere.onGazeOut();
+      }
     }
   });
+}
+
+var crosshairGeometry = new THREE.SphereGeometry( .3, 32, 32 );
+var crosshairMaterial = new THREE.MeshBasicMaterial({color: 0x4b4b4b, side: THREE.DoubleSide});
+var crosshair = new THREE.Mesh( crosshairGeometry, crosshairMaterial );
+crosshair.name = 'crosshair';
+crosshair.position.set(0, 0, -50);
+
 
 scene.add(camera);
 camera.add( crosshair );
@@ -112,8 +142,8 @@ enterVRButton.on('show', function() {
   document.getElementById('ui').style.display = 'inherit';
 });
 document.getElementById('vr-button').appendChild(enterVRButton.domElement);
-document.getElementById('vr-button').addEventListener('click', function() {
-  window.addEventListener( 'touchstart', onTouchDown, false );
+document.getElementById('vr-button').addEventListener('touchstart', function() {
+  document.getElementsByTagName('canvas')[0].addEventListener( 'touchstart', onTouchDown );
 });
 document.getElementById('no-vr').addEventListener('click', function() {
   // document.addEventListener( 'click', onTouchDown, false );
@@ -168,8 +198,9 @@ animate();
 function animate(delta) {
   Reticulum.update();
   card.lookAt( camera.position );
-  TWEEN.update();
+  outlineMesh.lookAt( camera.position );
 
+  TWEEN.update();
   effect.render(scene, camera);
 
   if (enterVRButton.isPresenting()) {
@@ -181,28 +212,28 @@ function animate(delta) {
 
 function growCard(card, oldPosition, newPosition, animationSpeed) {
   var position = oldPosition;
-  var scale = { x: 0, y: 0 };
+  position.scaleX = 0;
+  position.scaleY = 0;
 
-  var targetPosition = newPosition;
-  var targetScale = { x: 1, y: 1 };
+  var target = newPosition;
+  target.scaleX = 1;
+  target.scaleY = 1;
 
-  var tweenPosition = new TWEEN.Tween(position).to(targetPosition, animationSpeed);
-  var tweenScale = new TWEEN.Tween(scale).to(targetScale, animationSpeed);
+  var tween = new TWEEN.Tween(position).to(target, animationSpeed);
 
-  tweenPosition.onUpdate(function() {
+  tween.onUpdate(function() {
     card.position.x = position.x;
     card.position.y = position.y;
     card.position.z = position.z;
-  });
 
-  tweenScale.onUpdate(function() {
-    card.scale.x = scale.x;
-    card.scale.y = scale.y;
+    card.scale.set(position.scaleX, position.scaleY, 1);
+    outlineMesh.position.x = position.x;
+    outlineMesh.position.x = position.y;
+    outlineMesh.position.x = position.z;
   });
 
   if(card.scale.x < 1 || card.scale.y < 1) {
-    tweenScale.start();
-    tweenPosition.start();
+    tween.start();
   }
 }
 
@@ -236,12 +267,22 @@ function shrinkCard(card, newPosition, oldPosition, animationSpeed) {
 window.addEventListener('resize', onResize, false);
 
 function onTouchDown(event) {
-  event.preventDefault();
+  if(event.clientX) {
+    if(event.clientX >= halfWidth) {
+      camera.fov -= 20;
+    } else {
+      camera.fov += 20;
+    }
+  }
 
-  if(event.clientX >= halfWidth) {
-    camera.fov -= 20;
-  } else {
-    camera.fov += 20;
+  if(event.touches && event.touches[0]) {
+    if(event.touches[0].clientX >= halfWidth) {
+      var newCoord = Math.round((camera.scale.x - 0.2) * 10) / 10;
+      camera.scale.set(newCoord, newCoord, 1);
+    } else {
+      var newCoord = Math.round((camera.scale.x + 0.2) * 10) / 10;
+      camera.scale.set(newCoord, newCoord, 1);
+    }
   }
 
   if(camera.fov > 75) {
@@ -250,6 +291,14 @@ function onTouchDown(event) {
 
   if(camera.fov < 15) {
     camera.fov = 15;
+  }
+
+  if(camera.scale.x <= .2) {
+    camera.scale.set(.2, .2, 1);
+  }
+
+  if(camera.scale.x > 1) {
+    camera.scale.set(1, 1, 1);
   }
   camera.updateProjectionMatrix();
 }
