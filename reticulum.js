@@ -462,7 +462,7 @@ var Reticulum = (function () {
             vibrate( fuse.vibratePattern );
             //Does object have an action assigned to it?
             if (threeObject.onGazeLong != null) {
-                threeObject.onGazeLong();
+                threeObject.onGazeLong(threeObject.name);
             }
             //Reset the clock
             threeObject.userData.hitTime = elapsed;

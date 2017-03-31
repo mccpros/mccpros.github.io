@@ -1,6 +1,7 @@
 var hotspots = [
   {
     name: 'lancontroller',
+    orientation: 'front',
     sphere: {
       size: {
         x: .95,

@@ -1,5 +1,9 @@
 var winWidth = window.innerWidth;
 var halfWidth = window.innerWidth / 2;
+var orientation = 'front';
+var cardsArr = [];
+var hotspotsArr = [];
+var navArr = [];
 
 // Init and Config everything
 var scene = new THREE.Scene();
@@ -35,131 +39,168 @@ scene.add(mesh);
 
 
 //Set all the hotspots
-for (var i = 0; i < hotspots.length; i++) {
+function createHotspots(orientation) {
 
-  var hotspot      = hotspots[i],
-      sphereData   = hotspot.sphere,
-      cardData     = hotspot.card,
-      outlineData  = hotspot.outline,
-      cardTextData = hotspot.cardText;
+  hotspotsArr.forEach(function(hotspot) {
+    scene.remove(hotspot);
+    Reticulum.remove(hotspot);
+  });
+  cardsArr.forEach(function(card) {
+    scene.remove(card);
+    Reticulum.remove(card);
+  });
 
-  var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
-  var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
-  var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-  sphere.name = hotspot.name;
-  sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
-  scene.add(sphere);
+  hotspotsArr = [];
+  cardsArr = [];
 
-  var cardText = new THREEx.DynamicTexture( cardTextData.size.x, cardTextData.size.y );
-  cardText.context.font = cardTextData.fontSize + "px Roboto";
-  cardText.texture.anisotropy = renderer.getMaxAnisotropy();
-  cardText.clear('gray').drawText(cardTextData.header, undefined, cardTextData.x, 'white');
-
-  var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
-  var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: cardText.texture, color: 0xf1f1f1 });
-  var card = new THREE.Mesh( cardGeo, cardMat );
-
-  var outlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.FrontSide });
-  var outlineMesh = new THREE.Mesh( cardGeo, outlineMat );
-  outlineMesh.scale.multiplyScalar(outlineData.multipier);
-
-  card.name = 'card';
-  card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
-  outlineMesh.position.set( outlineData.pos.x, outlineData.pos.y, outlineData.pos.z );
-
-  card.scale.set( 0, 0, 1 );
-  outlineMesh.scale.set( 0, 0, 1 );
-  scene.add( card );
-  scene.add( outlineMesh );
-
-  Reticulum.add( sphere, card, {
-    clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
-    reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
-    fuseVisible: true, // Overrides global fuse visibility
-    fuseDuration: 1, // Overrides global fuse duration
-    fuseColor: 0x16b1c1, // Overrides global fuse color
-    sphere: sphere,
-    card: card,
-    opened: false,
-    cardPosition: cardData.pos,
-    timeout: null,
-    onGazeOver: function() {
-      // do something when user targets object
-      this.scale.set(1.1, 1.1, 1.1, 1.1);
-    },
-    onGazeOut: function(){
-      // do something when user moves reticle off targeted object
-      this.scale.set(1, 1, 1);
-
-      this.timeout = setTimeout(function() {
-        if(this.opened) {
-          var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-          shrinkCard(this.card, shallowPosition, this.card.position, 200);
-          this.opened = false;
-        }
-      }.bind(this), 2000)
-    },
-    onGazeLong: function() {
-      if(!this.opened) {
-        var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-        growCard(this.card, shallowPosition, this.cardPosition, 200);
-        this.opened = true;
-      }
-    },
-    onGazeCard: function(){
-      clearTimeout(this.parentSphere.timeout);
-    },
-    outGazeCard: function(){
-      if(this.parentSphere.opened) {
-        clearTimeout(this.parentSphere.timeout);
-        this.parentSphere.onGazeOut();
-      }
+  for (var i = 0; i < hotspots.length; i++) {
+    if(hotspots[i].orientation !== orientation) {
+      continue;
     }
-  });
+
+    var hotspot      = hotspots[i],
+        sphereData   = hotspot.sphere,
+        cardData     = hotspot.card,
+        outlineData  = hotspot.outline,
+        cardTextData = hotspot.cardText;
+
+    var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
+    var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
+    var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+    sphere.name = hotspot.name;
+    sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
+    scene.add(sphere);
+    hotspotsArr.push( sphere );
+
+    var cardText = new THREEx.DynamicTexture( cardTextData.size.x, cardTextData.size.y );
+    cardText.context.font = cardTextData.fontSize + "px Roboto";
+    cardText.texture.anisotropy = renderer.getMaxAnisotropy();
+    cardText.clear('gray').drawText(cardTextData.header, undefined, cardTextData.x, 'white');
+
+    var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
+    var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: cardText.texture, color: 0xf1f1f1 });
+    var card = new THREE.Mesh( cardGeo, cardMat );
+    cardsArr.push(card);
+
+    // var outlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.FrontSide });
+    // var outlineMesh = new THREE.Mesh( cardGeo, outlineMat );
+    // outlineMesh.scale.multiplyScalar(outlineData.multipier);
+
+    card.name = 'card';
+    card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
+    // outlineMesh.position.set( outlineData.pos.x, outlineData.pos.y, outlineData.pos.z );
+
+    card.scale.set( 0, 0, 1 );
+    // outlineMesh.scale.set( 0, 0, 1 );
+    scene.add( card );
+    // scene.add( outlineMesh );
+
+    Reticulum.add( sphere, card, {
+      clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
+      reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
+      fuseVisible: true, // Overrides global fuse visibility
+      fuseDuration: 1, // Overrides global fuse duration
+      fuseColor: 0x16b1c1, // Overrides global fuse color
+      sphere: sphere,
+      card: card,
+      opened: false,
+      cardPosition: cardData.pos,
+      timeout: null,
+      onGazeOver: function() {
+        // do something when user targets object
+        this.scale.set(1.1, 1.1, 1.1, 1.1);
+      },
+      onGazeOut: function(){
+        // do something when user moves reticle off targeted object
+        this.scale.set(1, 1, 1);
+
+        this.timeout = setTimeout(function() {
+          if(this.opened) {
+            var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
+            shrinkCard(this.card, shallowPosition, this.card.position, 200);
+            this.opened = false;
+          }
+        }.bind(this), 2000)
+      },
+      onGazeLong: function() {
+        if(!this.opened) {
+          var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
+          growCard(this.card, shallowPosition, this.cardPosition, 200);
+          this.opened = true;
+        }
+      },
+      onGazeCard: function(){
+        clearTimeout(this.parentSphere.timeout);
+      },
+      outGazeCard: function(){
+        if(this.parentSphere.opened) {
+          clearTimeout(this.parentSphere.timeout);
+          this.parentSphere.onGazeOut();
+        }
+      }
+    })
+  }
 }
-var positionY = 3;
-//Set all the nav spots
-for (var i = 0; i < navspots.length; i++) {
 
-  var navspot      = navspots[i],
-      panoData   = navspot.pano;
+createHotspots('front');
 
-  // var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
-  // var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
-  // var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-  // sphere.name = navspot.name;
-  // sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
-  // scene.add(sphere);
+function createNavSpots(orientation) {
+  var positionY = 3;
 
-  var planeGeometry = new THREE.PlaneGeometry(3, 1);
-  var planeMaterial = new THREE.MeshBasicMaterial({ map: loader.load(navspot.prev), side: THREE.DoubleSide })
-  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  plane.position.set(panoData.pos.x, panoData.pos.y, panoData.pos.z)
-  plane.rotation.x = Math.PI / 180 * 20;
-  scene.add(plane);
+  // Remove old navs
+  navArr.forEach(function(nav) {
+    scene.remove(nav);
+    Reticulum.remove(nav);
+  })
+  navArr = [];
 
-  Reticulum.add( plane, null, {
-    clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
-    reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
-    fuseVisible: true, // Overrides global fuse visibility
-    fuseDuration: 1, // Overrides global fuse duration
-    fuseColor: 0x16b1c1, // Overrides global fuse color
-    src: "/common/leftView.jpg",
-    onGazeOver: function() {
-      // do something when user targets object
-      this.scale.set(1.1, 1.1, 1.1, 1.1);
-    },
-    onGazeOut: function(){
-      // do something when user moves reticle off targeted object
-      console.log("Out");
-    },
-    onGazeLong: function() {
-      loader.load("/common/leftView.jpg", function(texture) {
-        material.map = texture;
-      })
-    },
-  });
+  //Set all the nav spots
+  for (var i = 0; i < navspots.length; i++) {
+    if(navspots[i].orientation !== orientation) {
+      continue;
+    }
+
+    var navspot      = navspots[i],
+        panoData     = navspot.pano;
+
+    var planeGeometry = new THREE.PlaneGeometry(3, 1);
+    var planeMaterial = new THREE.MeshBasicMaterial({ map: loader.load(navspot.prev), side: THREE.DoubleSide })
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.position.set(panoData.pos.x, panoData.pos.y, panoData.pos.z)
+    plane.rotation.x = Math.PI / 180 * 20;
+    plane.name = navspot.name;
+    plane.src = navspot.src;
+    scene.add(plane);
+    navArr.push(plane);
+
+    Reticulum.add( plane, null, {
+      clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
+      reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
+      fuseVisible: true, // Overrides global fuse visibility
+      fuseDuration: 1, // Overrides global fuse duration
+      fuseColor: 0x16b1c1, // Overrides global fuse color
+      src: "/common/leftView.jpg",
+      onGazeOver: function() {
+        // do something when user targets object
+        this.scale.set(1.1, 1.1, 1.1, 1.1);
+      },
+      onGazeOut: function(){
+        // do something when user moves reticle off targeted object
+        console.log("Out");
+      },
+      onGazeLong: function(name) {
+        loader.load(this.src, function(texture) {
+          material.map = texture;
+
+          createNavSpots(name);
+          createHotspots(name);
+        })
+      },
+    })
+  }
 }
+
+createNavSpots('front');
 
 var crosshairGeometry = new THREE.SphereGeometry( .3, 32, 32 );
 var crosshairMaterial = new THREE.MeshBasicMaterial({color: 0x4b4b4b, side: THREE.DoubleSide});
@@ -225,25 +266,14 @@ Reticulum.init(camera, {
   }
 });
 
-var hotspots = [sphere];
-var updateTexture = 0;
-var hoverTime = 0;
-var clock = new THREE.Clock();
-clock.autoStart = true;
-
-var panoList = [
-  '/common/snow_pano.jpg',
-  '/common/pano1.jpg',
-  '/common/pano2.jpg',
-  '/common/pano3.jpg',
-]
-
 animate();
 
 function animate(delta) {
   Reticulum.update();
-  card.lookAt( camera.position );
-  outlineMesh.lookAt( camera.position );
+  cardsArr.forEach(function(c) {
+    c.lookAt( camera.position );
+  });
+  // outlineMesh.lookAt( camera.position );
 
   TWEEN.update();
   effect.render(scene, camera);
@@ -272,9 +302,9 @@ function growCard(card, oldPosition, newPosition, animationSpeed) {
     card.position.z = position.z;
 
     card.scale.set(position.scaleX, position.scaleY, 1);
-    outlineMesh.position.x = position.x;
-    outlineMesh.position.x = position.y;
-    outlineMesh.position.x = position.z;
+    // outlineMesh.position.x = position.x;
+    // outlineMesh.position.x = position.y;
+    // outlineMesh.position.x = position.z;
   });
 
   if(card.scale.x < 1 || card.scale.y < 1) {

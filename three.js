@@ -3908,7 +3908,7 @@
 
 				} else {
 
-					console.warn( msg );
+					//console.warn( msg );
 
 				}
 
