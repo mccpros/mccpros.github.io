@@ -1,6 +1,7 @@
 var winWidth = window.innerWidth;
 var halfWidth = window.innerWidth / 2;
 
+// Init and Config everything
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth/ window.innerHeight, 1, 1100);
 
@@ -16,22 +17,27 @@ var effect = new THREE.VREffect(renderer);
 effect.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Set Image
 var geometry = new THREE.SphereGeometry(500, 60, 40);
 var loader = new THREE.TextureLoader();
 var texture = loader.load('/common/frontView.jpg');
 
+//Set VR Controls
 var controls = new THREE.VRControls(camera);
 controls.standing = true;
 camera.position.y = controls.userHeight;
 
+// Set Image more
 var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
 var mesh = new THREE.Mesh(geometry, material);
 mesh.position.set(0, controls.userHeight, -1);
 scene.add(mesh);
 
-for(var i = 0; i < hotspots.length; i++) {
 
-  var hotspot      = hotspots[0],
+//Set all the hotspots
+for (var i = 0; i < hotspots.length; i++) {
+
+  var hotspot      = hotspots[i],
       sphereData   = hotspot.sphere,
       cardData     = hotspot.card,
       outlineData  = hotspot.outline,
@@ -56,7 +62,7 @@ for(var i = 0; i < hotspots.length; i++) {
   var outlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.FrontSide });
   var outlineMesh = new THREE.Mesh( cardGeo, outlineMat );
   outlineMesh.scale.multiplyScalar(outlineData.multipier);
-  console.log(cardData);
+
   card.name = 'card';
   card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
   outlineMesh.position.set( outlineData.pos.x, outlineData.pos.y, outlineData.pos.z );
@@ -111,13 +117,55 @@ for(var i = 0; i < hotspots.length; i++) {
     }
   });
 }
+var positionY = 3;
+//Set all the nav spots
+for (var i = 0; i < navspots.length; i++) {
+
+  var navspot      = navspots[i],
+      panoData   = navspot.pano;
+
+  // var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
+  // var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
+  // var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+  // sphere.name = navspot.name;
+  // sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
+  // scene.add(sphere);
+
+  var planeGeometry = new THREE.PlaneGeometry(3, 1);
+  var planeMaterial = new THREE.MeshBasicMaterial({ map: loader.load(navspot.prev), side: THREE.DoubleSide })
+  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  plane.position.set(panoData.pos.x, panoData.pos.y, panoData.pos.z)
+  plane.rotation.x = Math.PI / 180 * 20;
+  scene.add(plane);
+
+  Reticulum.add( plane, null, {
+    clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
+    reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
+    fuseVisible: true, // Overrides global fuse visibility
+    fuseDuration: 1, // Overrides global fuse duration
+    fuseColor: 0x16b1c1, // Overrides global fuse color
+    src: "/common/leftView.jpg",
+    onGazeOver: function() {
+      // do something when user targets object
+      this.scale.set(1.1, 1.1, 1.1, 1.1);
+    },
+    onGazeOut: function(){
+      // do something when user moves reticle off targeted object
+      console.log("Out");
+    },
+    onGazeLong: function() {
+      loader.load("/common/leftView.jpg", function(texture) {
+        material.map = texture;
+      })
+    },
+  });
+}
 
 var crosshairGeometry = new THREE.SphereGeometry( .3, 32, 32 );
 var crosshairMaterial = new THREE.MeshBasicMaterial({color: 0x4b4b4b, side: THREE.DoubleSide});
 var crosshair = new THREE.Mesh( crosshairGeometry, crosshairMaterial );
 crosshair.name = 'crosshair';
 crosshair.position.set(0, 0, -50);
-
 
 scene.add(camera);
 camera.add( crosshair );

@@ -391,7 +391,7 @@ var Reticulum = (function () {
     };
 
     var gazeOut = function(threeObject) {
-      if(threeObject.name === "card")  {
+      if(threeObject.name === "card" && threeObject.onGazeOut != null)  {
         return threeObject.onGazeOut();
       }
         threeObject.userData.hitTime = 0;
@@ -408,7 +408,7 @@ var Reticulum = (function () {
     };
 
     var gazeOver = function(threeObject) {
-        if(threeObject.name === "card")  {
+        if(threeObject.name === "card" && threeObject.onGazeOver != null)  {
           return threeObject.onGazeOver();
         }
 
@@ -433,7 +433,9 @@ var Reticulum = (function () {
     };
 
     var gazeLong = function( threeObject ) {
-      if(threeObject.name === "card") return threeObject.onGazeOver();
+      if(threeObject.name === "card" && threeObject.onGazeOver !== null) {
+        return threeObject.onGazeOver();
+      }
         var distance;
         var elapsed = clock.getElapsedTime();
         var gazeTime = elapsed - threeObject.userData.hitTime;
@@ -501,8 +503,10 @@ var Reticulum = (function () {
             //Stores object options for reticulum
             threeObject.reticulumData = {};
             threeObject.reticulumData.gazeable = true;
-            card.reticulumData = {};
-            card.reticulumData.gazeable = true;
+            if(card != null) {
+              card.reticulumData = {};
+              card.reticulumData.gazeable = true;
+            }
 
             //Reticle
             threeObject.reticulumData.reticleHoverColor = null;
@@ -527,13 +531,17 @@ var Reticulum = (function () {
             threeObject.onGazeOut                               = parameters.onGazeOut              || null;
             threeObject.onGazeLong                              = parameters.onGazeLong             || null;
             threeObject.onGazeClick                             = parameters.onGazeClick            || null;
-            card.onGazeOver                                     = parameters.onGazeCard             || null;
-            card.onGazeOut                                      = parameters.outGazeCard            || null;
-            card.parentSphere                                   = threeObject                       || null;
+            if(card != null) {
+              card.onGazeOver                                     = parameters.onGazeCard             || null;
+              card.onGazeOut                                      = parameters.outGazeCard            || null;
+              card.parentSphere                                   = threeObject                       || null;
+            }
 
             //Add object to list
             collisionList.push(threeObject);
-            collisionList.push(card);
+            if(card != null) {
+              collisionList.push(card);
+            }
         },
         remove: function (threeObject) {
             var index = collisionList.indexOf(threeObject);
