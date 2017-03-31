@@ -20,8 +20,8 @@ var navspots = [
     pano: {
       pos: {
         x: 0,
-        y: 3,
-        z: 5,
+        y: 2,
+        z: 6,
       }
     }
   },
@@ -46,8 +46,8 @@ var navspots = [
     pano: {
       pos: {
         x: 0,
-        y: 3,
-        z: -5,
+        y: 2,
+        z: -6,
       }
     }
   }
