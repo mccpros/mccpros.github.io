@@ -16,14 +16,14 @@ var hotspots = [
     },
     card: {
       size: {
-        x: 4,
-        y: 5,
+        x: 12,
+        y: 8,
         z: 1
       },
       pos: {
-        x: -14,
-        y: 3,
-        z: 8,
+        x: -18,
+        y: 2,
+        z: 12,
       }
     },
     outline: {

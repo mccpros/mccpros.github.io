@@ -72,72 +72,63 @@ function createHotspots(orientation) {
     scene.add(sphere);
     hotspotsArr.push( sphere );
 
-    var cardText = new THREEx.DynamicTexture( cardTextData.size.x, cardTextData.size.y );
-    cardText.context.font = cardTextData.fontSize + "px Roboto";
-    cardText.texture.anisotropy = renderer.getMaxAnisotropy();
-    cardText.clear('gray').drawText(cardTextData.header, undefined, cardTextData.x, 'white');
+    loader.load('common/card.png', function(texture) {
+      var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
+      var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: texture, color: 0xf1f1f1, transparent:true, opacity: 1 });
+      card = new THREE.Mesh( cardGeo, cardMat );
+      card.rotation.set
+      cardsArr.push(card);
 
-    var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
-    var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: cardText.texture, color: 0xf1f1f1 });
-    var card = new THREE.Mesh( cardGeo, cardMat );
-    cardsArr.push(card);
+      card.name = 'card';
+      card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
 
-    // var outlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.FrontSide });
-    // var outlineMesh = new THREE.Mesh( cardGeo, outlineMat );
-    // outlineMesh.scale.multiplyScalar(outlineData.multipier);
+      card.scale.set( 0, 0, 1 );
+      scene.add( card );
 
-    card.name = 'card';
-    card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
-    // outlineMesh.position.set( outlineData.pos.x, outlineData.pos.y, outlineData.pos.z );
+      Reticulum.add( sphere, card, {
+        clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
+        reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
+        fuseVisible: true, // Overrides global fuse visibility
+        fuseDuration: 1, // Overrides global fuse duration
+        fuseColor: 0x16b1c1, // Overrides global fuse color
+        sphere: sphere,
+        card: card,
+        opened: false,
+        cardPosition: cardData.pos,
+        timeout: null,
+        onGazeOver: function() {
+          // do something when user targets object
+          this.scale.set(1.1, 1.1, 1.1, 1.1);
+        },
+        onGazeOut: function(){
+          // do something when user moves reticle off targeted object
+          this.scale.set(1, 1, 1);
 
-    card.scale.set( 0, 0, 1 );
-    // outlineMesh.scale.set( 0, 0, 1 );
-    scene.add( card );
-    // scene.add( outlineMesh );
-
-    Reticulum.add( sphere, card, {
-      clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
-      reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
-      fuseVisible: true, // Overrides global fuse visibility
-      fuseDuration: 1, // Overrides global fuse duration
-      fuseColor: 0x16b1c1, // Overrides global fuse color
-      sphere: sphere,
-      card: card,
-      opened: false,
-      cardPosition: cardData.pos,
-      timeout: null,
-      onGazeOver: function() {
-        // do something when user targets object
-        this.scale.set(1.1, 1.1, 1.1, 1.1);
-      },
-      onGazeOut: function(){
-        // do something when user moves reticle off targeted object
-        this.scale.set(1, 1, 1);
-
-        this.timeout = setTimeout(function() {
-          if(this.opened) {
+          this.timeout = setTimeout(function() {
+            if(this.opened) {
+              var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
+              shrinkCard(this.card, shallowPosition, this.card.position, 200);
+              this.opened = false;
+            }
+          }.bind(this), 2000)
+        },
+        onGazeLong: function() {
+          if(!this.opened) {
             var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-            shrinkCard(this.card, shallowPosition, this.card.position, 200);
-            this.opened = false;
+            growCard(this.card, shallowPosition, this.cardPosition, 200);
+            this.opened = true;
           }
-        }.bind(this), 2000)
-      },
-      onGazeLong: function() {
-        if(!this.opened) {
-          var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-          growCard(this.card, shallowPosition, this.cardPosition, 200);
-          this.opened = true;
-        }
-      },
-      onGazeCard: function(){
-        clearTimeout(this.parentSphere.timeout);
-      },
-      outGazeCard: function(){
-        if(this.parentSphere.opened) {
+        },
+        onGazeCard: function(){
           clearTimeout(this.parentSphere.timeout);
-          this.parentSphere.onGazeOut();
+        },
+        outGazeCard: function(){
+          if(this.parentSphere.opened) {
+            clearTimeout(this.parentSphere.timeout);
+            this.parentSphere.onGazeOut();
+          }
         }
-      }
+      })
     })
   }
 }

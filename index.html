@@ -18,6 +18,35 @@
   <script src="reticulum.js"></script>
   <script src="hotspots.js"></script>
   <script src="navspots.js"></script>
+  <script id="fragment_shh" type="x-shader/x-fragment">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform sampler2D tOne;
+    uniform sampler2D tSec;
+
+    varying vec2 vUv;
+
+    void main(void)
+    {
+      vec3 c;
+      vec4 Ca = texture2D(tOne, vUv);
+      vec4 Cb = texture2D(tSec, vUv);
+      c = Ca.rgb * Ca.a + Cb.rgb * Cb.a * (1.0 - Ca.a);  // blending equation
+      gl_FragColor= vec4(c, 1.0);
+    }
+  </script>
+  <script id="vertex_shh" type="x-shader/x-vertex">
+    varying vec2 vUv;
+
+    void main()
+    {
+        vUv = uv;
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        gl_Position = projectionMatrix * mvPosition;
+    }
+  </script>
   <style type="text/css">
     body {
       width: 100%;
