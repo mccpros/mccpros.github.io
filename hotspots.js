@@ -8,21 +8,21 @@ var hotspots = [
         z: 32
       },
       pos: {
-        x: 20,
-        y: 9,
-        z: -6
+        x: -18,
+        y: 6,
+        z: 6
       }
     },
     card: {
       size: {
-        x: 8,
-        y: 10,
+        x: 4,
+        y: 5,
         z: 1
       },
       pos: {
-        x: 20,
-        y: 9,
-        z: -6
+        x: -14,
+        y: 3,
+        z: 8,
       }
     },
     outline: {

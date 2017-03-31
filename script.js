@@ -18,7 +18,7 @@ document.body.appendChild(renderer.domElement);
 
 var geometry = new THREE.SphereGeometry(500, 60, 40);
 var loader = new THREE.TextureLoader();
-var texture = loader.load('/common/converted.jpg');
+var texture = loader.load('/common/frontView.JPG');
 
 var controls = new THREE.VRControls(camera);
 controls.standing = true;
@@ -56,9 +56,9 @@ for(var i = 0; i < hotspots.length; i++) {
   var outlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.FrontSide });
   var outlineMesh = new THREE.Mesh( cardGeo, outlineMat );
   outlineMesh.scale.multiplyScalar(outlineData.multipier);
-
+  console.log(cardData);
   card.name = 'card';
-  card.position.set( cardData.pos.x, cardData.pos.y, cardData.pos.z );
+  card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
   outlineMesh.position.set( outlineData.pos.x, outlineData.pos.y, outlineData.pos.z );
 
   card.scale.set( 0, 0, 1 );
@@ -75,7 +75,7 @@ for(var i = 0; i < hotspots.length; i++) {
     sphere: sphere,
     card: card,
     opened: false,
-    cardPosition: { x: 28, y: 9, z: -15 },
+    cardPosition: cardData.pos,
     timeout: null,
     onGazeOver: function() {
       // do something when user targets object
@@ -101,12 +101,9 @@ for(var i = 0; i < hotspots.length; i++) {
       }
     },
     onGazeCard: function(){
-      console.log("CARD IN");
       clearTimeout(this.parentSphere.timeout);
     },
     outGazeCard: function(){
-      console.log("CARD OUT");
-      console.log(this.parentSphere);
       if(this.parentSphere.opened) {
         clearTimeout(this.parentSphere.timeout);
         this.parentSphere.onGazeOut();
