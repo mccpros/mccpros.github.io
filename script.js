@@ -18,7 +18,7 @@ document.body.appendChild(renderer.domElement);
 
 var geometry = new THREE.SphereGeometry(500, 60, 40);
 var loader = new THREE.TextureLoader();
-var texture = loader.load('/common/frontView.JPG');
+var texture = loader.load('/common/frontView.jpg');
 
 var controls = new THREE.VRControls(camera);
 controls.standing = true;
