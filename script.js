@@ -102,7 +102,7 @@ function createHotspots(orientation) {
         },
         onGazeOut: function(){
           // do something when user moves reticle off targeted object
-          this.scale.set(1, 1, 1);
+          this.scale.set(1, 1, 1, 1);
 
           this.timeout = setTimeout(function() {
             if(this.opened) {
@@ -177,6 +177,7 @@ function createNavSpots(orientation) {
       },
       onGazeOut: function(){
         // do something when user moves reticle off targeted object
+        this.scale.set(1, 1, 1, 1);
         console.log("Out");
       },
       onGazeLong: function(name) {
@@ -235,9 +236,9 @@ Reticulum.init(camera, {
   reticle: {
     visible: true,
     restPoint: 1000, //Defines the reticle's resting point when no object has been targeted
-    color: 0xcc0000,
+    color: 0x0b0b0b,
     innerRadius: 0.0001,
-    outerRadius: 0.003,
+    outerRadius: 0.002,
     hover: {
       color: 0xcc0000,
       innerRadius: 0.009,
@@ -250,8 +251,8 @@ Reticulum.init(camera, {
     visible: true,
     duration: 1.5,
     color: 0xf1f1f1,
-    innerRadius: 0.035,
-    outerRadius: 0.0436,
+    innerRadius: 0.02,
+    outerRadius: 0.025,
     vibrate: [], //Set to 0 or [] to disable
     clickCancelFuse: false //If users clicks on targeted object fuse is canceled
   }

@@ -70,7 +70,7 @@ var Reticulum = (function () {
         this.mesh.visible = this.visible;
 
         //Change position and rotation of fuse
-        this.mesh.position.z = 0.005; // Keep in front of reticle
+        this.mesh.position.z = 0.5; // Keep in front of reticle
         this.mesh.rotation.y = 180*(Math.PI/180); //Make it clockwise
 
         //Add to reticle
@@ -146,7 +146,7 @@ var Reticulum = (function () {
         this.ignoreInvisible    = parameters.ignoreInvisible    !== false; //default to true;
 
         //Hover
-        this.innerRadiusTo      = parameters.hover.innerRadius  || 0.02;
+        // this.innerRadiusTo      = parameters.hover.innerRadius  || 0.02;
         this.outerRadiusTo      = parameters.hover.outerRadius  || 0.024;
         this.globalColorTo      = parameters.hover.color        || this.color;
         this.vibrateHover       = parameters.hover.vibrate      || 50;
@@ -201,8 +201,8 @@ var Reticulum = (function () {
         var scale = Math.abs( cameraZ - z ) - Math.abs( cameraZ );
 
         //Set Depth
-        crosshair.position.x = 0;
-        crosshair.position.y = 0;
+        // crosshair.position.x = 0;
+        // crosshair.position.y = 0;
         crosshair.position.z = utilities.clampBottom( z, settings.camera.near+0.1 ) * -1;
 
         //Set Scale
@@ -223,7 +223,7 @@ var Reticulum = (function () {
             this.moveSpeed = Math.max(this.moveSpeed, 0);
         }
         //Morph
-        this.mesh.morphTargetInfluences[ 0 ] = this.moveSpeed;
+        // this.mesh.morphTargetInfluences[ 0 ] = this.moveSpeed;
         //Set Color
         this.color = this.globalColor.clone();
         //console.log( this.color.lerp( this.colorTo, this.moveSpeed ) )
