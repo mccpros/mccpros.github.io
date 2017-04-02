@@ -1,6 +1,6 @@
 var winWidth = window.innerWidth;
 var halfWidth = window.innerWidth / 2;
-var orientation = 'front';
+var orientationStart = 'front';
 var cardsArr = [];
 var hotspotsArr = [];
 var navArr = [];
@@ -66,7 +66,6 @@ function createHotspots(orientation) {
     var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
     var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
     var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-
     sphere.name = hotspot.name;
     sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
     scene.add(sphere);
@@ -136,7 +135,7 @@ function createHotspots(orientation) {
   }
 }
 
-createHotspots(orientation);
+createHotspots(orientationStart);
 
 function createNavSpots(orientation) {
   var positionY = 3;
@@ -156,10 +155,10 @@ function createNavSpots(orientation) {
 
     var navspot      = navspots[i],
         panoData     = navspot.pano;
-
     var planeGeometry = new THREE.PlaneGeometry(3, 1);
     var planeMaterial = new THREE.MeshBasicMaterial({ map: loader.load(navspot.prev), side: THREE.DoubleSide })
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
     plane.position.set(panoData.pos.x, panoData.pos.y, panoData.pos.z)
     plane.rotation.x = Math.PI / 180 * 20;
     plane.name = navspot.name;
@@ -196,7 +195,7 @@ function createNavSpots(orientation) {
   }
 }
 
-createNavSpots(orientation);
+createNavSpots(orientationStart);
 
 var crosshairGeometry = new THREE.SphereGeometry( .3, 32, 32 );
 var crosshairMaterial = new THREE.MeshBasicMaterial({color: 0x4b4b4b, side: THREE.DoubleSide});
