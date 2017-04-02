@@ -24,7 +24,7 @@ document.body.appendChild(renderer.domElement);
 // Set Image
 var geometry = new THREE.SphereGeometry(500, 60, 40);
 var loader = new THREE.TextureLoader();
-var texture = loader.load('/common/frontView.jpg');
+var texture = loader.load('/common/views/frontView.jpg');
 
 //Set VR Controls
 var controls = new THREE.VRControls(camera);
@@ -63,77 +63,80 @@ function createHotspots(orientation) {
         cardData     = hotspot.card,
         outlineData  = hotspot.outline,
         cardTextData = hotspot.cardText;
-
     var sphereGeometry = new THREE.SphereGeometry( sphereData.size.x, sphereData.size.y, sphereData.size.z );
     var sphereMaterial = new THREE.MeshBasicMaterial({color: 0xf1f1f1, side: THREE.DoubleSide});
     var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+
     sphere.name = hotspot.name;
     sphere.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
     scene.add(sphere);
     hotspotsArr.push( sphere );
 
-    loader.load('common/card.png', function(texture) {
-      var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
-      var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: texture, color: 0xf1f1f1, transparent:true, opacity: 1 });
-      card = new THREE.Mesh( cardGeo, cardMat );
-      card.rotation.set
-      cardsArr.push(card);
+    (function(sphere, cardData) {
+      loader.load(hotspot.src, function(texture) {
+        var cardGeo = new THREE.PlaneBufferGeometry( cardData.size.x, cardData.size.y, cardData.size.z );
+        var cardMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: texture, color: 0xf1f1f1, transparent:true, opacity: 1 });
+        var card = new THREE.Mesh( cardGeo, cardMat );
 
-      card.name = 'card';
-      card.position.set( sphereData.pos.x, sphereData.pos.y, sphereData.pos.z );
+        card.rotation.set
+        cardsArr.push(card);
 
-      card.scale.set( 0, 0, 1 );
-      scene.add( card );
+        card.name = 'card';
+        card.position.set( cardData.pos.x, cardData.pos.y, cardData.pos.z );
 
-      Reticulum.add( sphere, card, {
-        clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
-        reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
-        fuseVisible: true, // Overrides global fuse visibility
-        fuseDuration: 1, // Overrides global fuse duration
-        fuseColor: 0x16b1c1, // Overrides global fuse color
-        sphere: sphere,
-        card: card,
-        opened: false,
-        cardPosition: cardData.pos,
-        timeout: null,
-        onGazeOver: function() {
-          // do something when user targets object
-          this.scale.set(1.1, 1.1, 1.1, 1.1);
-        },
-        onGazeOut: function(){
-          // do something when user moves reticle off targeted object
-          this.scale.set(1, 1, 1, 1);
+        card.scale.set( 0, 0, 1 );
+        scene.add( card );
 
-          this.timeout = setTimeout(function() {
-            if(this.opened) {
+        Reticulum.add( sphere, card, {
+          clickCancelFuse: true, // Overrides global setting for fuse's clickCancelFuse
+          reticleHoverColor: 0xf1f1f1, // Overrides global reticle hover color
+          fuseVisible: true, // Overrides global fuse visibility
+          fuseDuration: 1, // Overrides global fuse duration
+          fuseColor: 0x16b1c1, // Overrides global fuse color
+          sphere: sphere,
+          card: card,
+          opened: false,
+          cardPosition: cardData.pos,
+          timeout: null,
+          onGazeOver: function() {
+            // do something when user targets object
+            this.scale.set(1.1, 1.1, 1.1, 1.1);
+          },
+          onGazeOut: function(){
+            // do something when user moves reticle off targeted object
+            this.scale.set(1, 1, 1, 1);
+
+            this.timeout = setTimeout(function() {
+              if(this.opened) {
+                var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
+                shrinkCard(this.card, shallowPosition, this.card.position, 200);
+                this.opened = false;
+              }
+            }.bind(this), 2000)
+          },
+          onGazeLong: function() {
+            if(!this.opened) {
               var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-              shrinkCard(this.card, shallowPosition, this.card.position, 200);
-              this.opened = false;
+              growCard(this.card, shallowPosition, this.cardPosition, 200);
+              this.opened = true;
             }
-          }.bind(this), 2000)
-        },
-        onGazeLong: function() {
-          if(!this.opened) {
-            var shallowPosition = JSON.parse(JSON.stringify(this.sphere.position))
-            growCard(this.card, shallowPosition, this.cardPosition, 200);
-            this.opened = true;
-          }
-        },
-        onGazeCard: function(){
-          clearTimeout(this.parentSphere.timeout);
-        },
-        outGazeCard: function(){
-          if(this.parentSphere.opened) {
+          },
+          onGazeCard: function(){
             clearTimeout(this.parentSphere.timeout);
-            this.parentSphere.onGazeOut();
+          },
+          outGazeCard: function(){
+            if(this.parentSphere.opened) {
+              clearTimeout(this.parentSphere.timeout);
+              this.parentSphere.onGazeOut();
+            }
           }
-        }
+        })
       })
-    })
+    })(sphere, cardData);
   }
 }
 
-createHotspots('front');
+createHotspots(orientation);
 
 function createNavSpots(orientation) {
   var positionY = 3;
@@ -161,6 +164,7 @@ function createNavSpots(orientation) {
     plane.rotation.x = Math.PI / 180 * 20;
     plane.name = navspot.name;
     plane.src = navspot.src;
+    plane.lookAt(camera);
     scene.add(plane);
     navArr.push(plane);
 
@@ -192,7 +196,7 @@ function createNavSpots(orientation) {
   }
 }
 
-createNavSpots('front');
+createNavSpots(orientation);
 
 var crosshairGeometry = new THREE.SphereGeometry( .3, 32, 32 );
 var crosshairMaterial = new THREE.MeshBasicMaterial({color: 0x4b4b4b, side: THREE.DoubleSide});
@@ -260,12 +264,15 @@ Reticulum.init(camera, {
 
 animate();
 
+function lookat(c) {
+  c.lookAt( camera.position );
+}
+
 function animate(delta) {
   Reticulum.update();
-  cardsArr.forEach(function(c) {
-    c.lookAt( camera.position );
-  });
-  // outlineMesh.lookAt( camera.position );
+
+  cardsArr.forEach(lookat);
+  navArr.forEach(lookat);
 
   TWEEN.update();
   effect.render(scene, camera);
