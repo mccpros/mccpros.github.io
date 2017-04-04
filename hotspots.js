@@ -1,8 +1,8 @@
 var hotspots = [
   {
-    name: 'switchStack',
+    name: 'firewall',
     orientation: 'front',
-    src: '/common/cards/switchStack.png',
+    src: '/common/cards/firewall.png',
     sphere: {
       size: {
         x: .95,
@@ -29,9 +29,9 @@ var hotspots = [
     }
   },
   {
-    name: 'switchStack',
+    name: 'firewall',
     orientation: 'right',
-    src: '/common/cards/switchStack.png',
+    src: '/common/cards/firewall.png',
     sphere: {
       size: {
         x: .95,
@@ -58,9 +58,9 @@ var hotspots = [
     }
   },
   {
-    name: 'switchStack',
+    name: 'firewall',
     orientation: 'left',
-    src: '/common/cards/switchStack.png',
+    src: '/common/cards/firewall.png',
     sphere: {
       size: {
         x: .95,
@@ -290,9 +290,9 @@ var hotspots = [
     }
   },
   {
-    name: 'telepacific',
+    name: 'irs',
     orientation: 'front',
-    src: '/common/cards/cienaSwitch.png',
+    src: '/common/cards/irs.png',
     sphere: {
       size: {
         x: .95,
@@ -319,9 +319,9 @@ var hotspots = [
     }
   },
   {
-    name: 'telepacific',
+    name: 'irs',
     orientation: 'right',
-    src: '/common/cards/cienaSwitch.png',
+    src: '/common/cards/irs.png',
     sphere: {
       size: {
         x: .95,
@@ -348,9 +348,9 @@ var hotspots = [
     }
   },
   {
-    name: 'telepacific',
+    name: 'irs',
     orientation: 'left',
-    src: '/common/cards/cienaSwitch.png',
+    src: '/common/cards/irs.png',
     sphere: {
       size: {
         x: .95,
@@ -379,7 +379,7 @@ var hotspots = [
   {
     name: 'shoretel',
     orientation: 'front',
-    src: '/common/cards/switchStack.png',
+    src: '/common/cards/shoretel.png',
     sphere: {
       size: {
         x: .95,
@@ -408,7 +408,7 @@ var hotspots = [
   {
     name: 'shoretel',
     orientation: 'right',
-    src: '/common/cards/switchStack.png',
+    src: '/common/cards/shoretel.png',
     sphere: {
       size: {
         x: .95,
@@ -437,7 +437,7 @@ var hotspots = [
   {
     name: 'shoretel',
     orientation: 'left',
-    src: '/common/cards/switchStack.png',
+    src: '/common/cards/firewall.png',
     sphere: {
       size: {
         x: .95,
@@ -466,7 +466,7 @@ var hotspots = [
   {
     name: 'cable',
     orientation: 'front',
-    src: '/common/cards/cienaSwitch.png',
+    src: '/common/cards/cable.png',
     sphere: {
       size: {
         x: .95,
@@ -495,7 +495,7 @@ var hotspots = [
   {
     name: 'cable',
     orientation: 'right',
-    src: '/common/cards/cienaSwitch.png',
+    src: '/common/cards/cable.png',
     sphere: {
       size: {
         x: .95,
@@ -517,6 +517,64 @@ var hotspots = [
       pos: {
         x: -25,
         y: 12.5,
+        z: -8,
+      }
+    }
+  },
+  {
+    name: 'stack',
+    orientation: 'front',
+    src: '/common/cards/stack.png',
+    sphere: {
+      size: {
+        x: .95,
+        y: 32,
+        z: 32
+      },
+      pos: {
+        x: -15,
+        y: 5,
+        z: -15
+      }
+    },
+    card: {
+      size: {
+        x: 12,
+        y: 8,
+        z: 1
+      },
+      pos: {
+        x: -18,
+        y: 0,
+        z: -18,
+      }
+    }
+  },
+  {
+    name: 'stack',
+    orientation: 'right',
+    src: '/common/cards/stack.png',
+    sphere: {
+      size: {
+        x: .95,
+        y: 32,
+        z: 32
+      },
+      pos: {
+        x: -18,
+        y: 4,
+        z: 0
+      }
+    },
+    card: {
+      size: {
+        x: 15,
+        y: 8,
+        z: 10
+      },
+      pos: {
+        x: -25,
+        y: -1,
         z: -8,
       }
     }

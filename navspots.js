@@ -1,18 +1,5 @@
 var navspots = [
   {
-    name: "left",
-    orientation: 'front',
-    src: "/common/views/leftView.jpg",
-    prev: "/common/views/leftViewSmall.jpg",
-    pano: {
-      pos: {
-        x: 0,
-        y: 3,
-        z: 5,
-      }
-    }
-  },
-  {
     name: "front",
     orientation: 'right',
     src: "/common/views/frontView.jpg",
